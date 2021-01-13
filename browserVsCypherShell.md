@@ -41,7 +41,7 @@ The number of unique paths is not a problem unto itself, but can have an impact 
 
 ![Figure 4. One and two traversal Neo4j Browser interactive graph visualization](https://cdn-images-1.medium.com/max/2128/1*N77iditHR55k4LmshSL-Pg.jpeg)*Figure 4. One and two traversal Neo4j Browser interactive graph visualization*
 
-*Figure 4* shows 47 nodes and 70 relationships displayed, even though the underlying query returns 170 unique paths. Why the discrepancy between what’s visualized and the underlying data set it represents? The Neo4j Browser transforms the multi-dimensional overlapping data into a 2D visual. The visualization is very useful for exploring query results with the unfortunate potential side effect of obscuring the actual amount of data returned. (see “[The Graph Database Chronicles Episode 1](https://vimeo.com/412062101/f779f65d71)” for a deeper discussion if this seems strange to you).
+*Figure 4* shows 47 nodes and 70 relationships displayed, but running a path count query MATCH paths=(:Node)-[:PARENT_OF*1..2]->() RETURN count(path) returns 170 unique paths. Why the discrepancy between what’s visualized and the underlying data set it represents? The Neo4j Browser transforms the multi-dimensional overlapping data into a 2D visual. The visualization is very useful for exploring query results with the unfortunate potential side effect of obscuring the actual amount of data returned. (see “[The Graph Database Chronicles Episode 1](https://vimeo.com/412062101/f779f65d71)” for a deeper discussion if this seems strange to you).
 
 The 50 node / 70 relationship example graph has a total of 5,673 unique paths. A visualization of all the unique paths is not much different from *figure 4*, but the underlying data is approximately a 3,000% increase over the 170 one and two hop traversal query paths. The query MATCH path=(:Node)-[:PARENT_OF*]->() RETURN path illustrates returning all the paths for any number of traversals. Running this in the Neo4j Browser would result in the f*igure 2* spinning dots. ***Not to worry!*** Turns out that the query is not the issue. 
 > ⁉️ This is a good time for a reality check. It should be asked what the query is trying to accomplish and will the visualization add any value, or is it just eye candy? 👀 For this example it would be hard to come up with valid reason for needing a flattened visualization of 5,673 unique paths. “But wait! I am looking for unrecognized patterns in my graph!” is a common quick response. A flattened force-directed layout is not going to give you this. What’s really being asked for is the ability to find patterns  based on the shape of the data in the graph. This is where the algorithms in the Neo4j [Graph Data Science Library](https://neo4j.com/product/graph-data-science-library/) are extremely useful. Applying graph algorithms is very worthwhile to look into, but is a topic well past this post.
@@ -59,6 +59,8 @@ Notice two things:
 1. The query starts streaming results in 1ms and completes after 10ms. 
 
 The aggregation avoids having to return and render the interactive graph visualization. There’s no fun force-directed layout visual (which is of dubious value in this use case), but at least it is known that it’s not the query execution itself that’s the issue. 
+
+The 5,673 unique paths in my example graph represents a combination of *all* paths. This is often not what a user wants and is an example of how the graph visualization can obscure the underlying data. This post is focusing on when intentionally or not, a query returns more data than is reasonable for the Neo4j Browser to process. Why there’s 5,673 paths returned and why this may not be obvious is a topic for another discussion. 
 
 **2Use the PROFILE query directive to avoid the default force-directed visual layout.** Using the [PROFILE](https://neo4j.com/docs/cypher-manual/current/query-tuning/how-do-i-profile-a-query/#how-do-i-profile-a-query) directive will show how the query was executed, the processing time and show the query execution steps as the initial output, avoiding the default graph visualization step. To see this in action, run the all paths query with the PROFILE command: PROFILE MATCH paths=(:Node)-[:PARENT_OF*]->() RETURN paths which shows the query executing in 11ms as shown in *figure 6* below. If you then click on the graph visualization icon  as shown in *figure 7*, you’ll likely end up waiting for the visualization to render as in f*igure 2*. The Neo4j Browser might have to be closed and reopened to continue on. 
 
@@ -119,7 +121,7 @@ A blog post could never even begin to address the subject of the yin and yang of
 
 1. This should be obvious, but sure you have a graph use case! It is so much fun and easy working with a Neo4j graph database that it is easy to try and apply it to scenarios where graph does not add any value. Watch this short [video](https://www.youtube.com/watch?v=keZURbOo4-M&feature=youtu.be) for a good introduction on identifying graph shaped problems
 
-## Parting Thoughts. Yours and mine.
+## Parting Thoughts. Yours and Mine.
 
 Thank you for your time if you made this far. Please post any questions or comments as I am very interested in what readers think and am hoping to gain insight from any responses. 
 
